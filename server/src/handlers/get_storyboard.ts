@@ -1,9 +1,23 @@
 
+import { db } from '../db';
+import { storyboardsTable } from '../db/schema';
 import { type Storyboard } from '../schema';
+import { eq } from 'drizzle-orm';
 
 export async function getStoryboard(id: number): Promise<Storyboard | null> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching a single storyboard by ID from the database,
-    // including its related scenes, characters, and locations.
-    return null;
+  try {
+    const results = await db.select()
+      .from(storyboardsTable)
+      .where(eq(storyboardsTable.id, id))
+      .execute();
+
+    if (results.length === 0) {
+      return null;
+    }
+
+    return results[0];
+  } catch (error) {
+    console.error('Failed to get storyboard:', error);
+    throw error;
+  }
 }

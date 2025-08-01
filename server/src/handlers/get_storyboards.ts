@@ -1,9 +1,17 @@
 
+import { db } from '../db';
+import { storyboardsTable } from '../db/schema';
 import { type Storyboard } from '../schema';
 
-export async function getStoryboards(): Promise<Storyboard[]> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching all storyboards from the database
-    // and returning them as an array.
-    return [];
-}
+export const getStoryboards = async (): Promise<Storyboard[]> => {
+  try {
+    const results = await db.select()
+      .from(storyboardsTable)
+      .execute();
+
+    return results;
+  } catch (error) {
+    console.error('Failed to fetch storyboards:', error);
+    throw error;
+  }
+};

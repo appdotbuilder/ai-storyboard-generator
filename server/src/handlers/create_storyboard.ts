@@ -1,17 +1,25 @@
 
+import { db } from '../db';
+import { storyboardsTable } from '../db/schema';
 import { type CreateStoryboardInput, type Storyboard } from '../schema';
 
-export async function createStoryboard(input: CreateStoryboardInput): Promise<Storyboard> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is creating a new storyboard with initial prompt or script content,
-    // persisting it in the database and returning the created storyboard with generated ID.
-    return Promise.resolve({
-        id: 0, // Placeholder ID
+export const createStoryboard = async (input: CreateStoryboardInput): Promise<Storyboard> => {
+  try {
+    // Insert storyboard record
+    const result = await db.insert(storyboardsTable)
+      .values({
         title: input.title,
         initial_prompt: input.initial_prompt,
         script_content: input.script_content,
-        status: 'draft' as const,
-        created_at: new Date(),
-        updated_at: new Date()
-    } as Storyboard);
-}
+        status: 'draft' // Default status
+      })
+      .returning()
+      .execute();
+
+    const storyboard = result[0];
+    return storyboard;
+  } catch (error) {
+    console.error('Storyboard creation failed:', error);
+    throw error;
+  }
+};

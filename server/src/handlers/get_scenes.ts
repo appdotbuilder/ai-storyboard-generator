@@ -1,9 +1,20 @@
 
+import { db } from '../db';
+import { scenesTable } from '../db/schema';
 import { type Scene } from '../schema';
+import { eq, asc } from 'drizzle-orm';
 
 export async function getScenes(storyboardId: number): Promise<Scene[]> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching all scenes for a specific storyboard,
-    // ordered by sequence_number, and returning them as an array.
-    return [];
+  try {
+    const results = await db.select()
+      .from(scenesTable)
+      .where(eq(scenesTable.storyboard_id, storyboardId))
+      .orderBy(asc(scenesTable.sequence_number))
+      .execute();
+
+    return results;
+  } catch (error) {
+    console.error('Failed to get scenes:', error);
+    throw error;
+  }
 }

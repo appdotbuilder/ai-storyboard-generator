@@ -1,14 +1,24 @@
 
+import { db } from '../db';
+import { charactersTable } from '../db/schema';
 import { type CreateCharacterInput, type Character } from '../schema';
 
-export async function createCharacter(input: CreateCharacterInput): Promise<Character> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is creating a new character,
-    // persisting it in the database and returning the created character.
-    return Promise.resolve({
-        id: 0, // Placeholder ID
+export const createCharacter = async (input: CreateCharacterInput): Promise<Character> => {
+  try {
+    // Insert character record
+    const result = await db.insert(charactersTable)
+      .values({
         name: input.name,
-        description: input.description,
-        created_at: new Date()
-    } as Character);
-}
+        description: input.description
+      })
+      .returning()
+      .execute();
+
+    // Return the created character
+    const character = result[0];
+    return character;
+  } catch (error) {
+    console.error('Character creation failed:', error);
+    throw error;
+  }
+};

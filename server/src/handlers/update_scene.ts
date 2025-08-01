@@ -1,18 +1,42 @@
 
+import { db } from '../db';
+import { scenesTable } from '../db/schema';
 import { type UpdateSceneInput, type Scene } from '../schema';
+import { eq, sql } from 'drizzle-orm';
 
-export async function updateScene(input: UpdateSceneInput): Promise<Scene> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is updating an existing scene with new data,
-    // updating the updated_at timestamp, and returning the updated scene.
-    return Promise.resolve({
-        id: input.id,
-        storyboard_id: 1,
-        sequence_number: 1,
-        title: input.title || 'Updated Scene',
-        description: input.description || 'Updated description',
-        location_id: input.location_id || null,
-        created_at: new Date(),
-        updated_at: new Date()
-    } as Scene);
-}
+export const updateScene = async (input: UpdateSceneInput): Promise<Scene> => {
+  try {
+    // Build update data object with only provided fields
+    const updateData: any = {
+      updated_at: sql`NOW()` // Always update the timestamp
+    };
+
+    if (input.title !== undefined) {
+      updateData.title = input.title;
+    }
+
+    if (input.description !== undefined) {
+      updateData.description = input.description;
+    }
+
+    if (input.location_id !== undefined) {
+      updateData.location_id = input.location_id;
+    }
+
+    // Update scene record
+    const result = await db.update(scenesTable)
+      .set(updateData)
+      .where(eq(scenesTable.id, input.id))
+      .returning()
+      .execute();
+
+    if (result.length === 0) {
+      throw new Error(`Scene with id ${input.id} not found`);
+    }
+
+    return result[0];
+  } catch (error) {
+    console.error('Scene update failed:', error);
+    throw error;
+  }
+};
